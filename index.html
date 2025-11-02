@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>David - Photographer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: Georgia, 'Times New Roman', serif;
+            line-height: 1.7;
+            color: #e8dfd0;
+            background: #1a1410;
+            letter-spacing: 0.02em;
+            cursor: none;
+        }
+        
+        /* Custom cursor */
+        .cursor {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #3d5a3d;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transition: all 0.1s ease;
+            mix-blend-mode: difference;
+        }
+        
+        .cursor-follower {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(61, 90, 61, 0.3);
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9998;
+            transition: all 0.3s ease;
+            mix-blend-mode: difference;
+        }
+        
+        .cursor.hover {
+            width: 60px;
+            height: 60px;
+            background: rgba(61, 90, 61, 0.1);
+        }
+        
+        /* Persistent vertical navigation */
+        nav {
+            position: fixed;
+            right: 3rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+        }
+        
+        nav ul {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        nav a {
+            color: #3d5a3d;
+            text-decoration: none;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: #5a7a5a;
+        }
+        
+        /* Hero section with parallax */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 4rem 3rem 4rem 6rem;
+            background: #1a1410;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero-bg {
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            background: 
+                radial-gradient(circle at 30% 40%, rgba(61, 90, 61, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 60%, rgba(168, 144, 120, 0.03) 0%, transparent 50%);
+            transition: transform 0.1s ease-out;
+        }
+        
+        .hero-content {
+            max-width: 600px;
+            margin-left: 2rem;
+            position: relative;
+            z-index: 1;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 1s ease forwards 0.3s;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            color: #e8dfd0;
+            line-height: 1.2;
+        }
+        
+        .hero p {
+            font-size: 1rem;
+            color: #a89078;
+            max-width: 450px;
+            line-height: 1.8;
+        }
+        
+        /* Work section with textured background */
+        #work {
+            padding: 6rem 3rem 6rem 6rem;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(61, 90, 61, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(168, 144, 120, 0.05) 0%, transparent 50%),
+                #2a2010;
+            position: relative;
+        }
+        
+        /* Subtle decay texture overlay */
+        #work::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 100px,
+                    rgba(168, 144, 120, 0.02) 100px,
+                    rgba(168, 144, 120, 0.02) 101px
+                );
+            pointer-events: none;
+        }
+        
+        .section-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: #3d5a3d;
+            margin-bottom: 3rem;
+            padding-left: 2rem;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2.5rem;
+            margin-left: 2rem;
+            max-width: 1000px;
+        }
+        
+        .gallery-item {
+            background: linear-gradient(135deg, #3a3028, #2a2010);
+            aspect-ratio: 3/2;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(168, 144, 120, 0.1);
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        
+        .gallery-item.visible {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .gallery-item:hover {
+            transform: scale(1.02);
+        }
+        
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+        
+        .gallery-item::after {
+            content: attr(data-title);
+            position: absolute;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            color: #e8dfd0;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+        
+        .gallery-item:hover::after {
+            opacity: 1;
+        }
+        
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .lightbox.active {
+            display: flex;
+            animation: fadeIn 0.3s ease forwards;
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+        
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+        
+        .lightbox-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: #e8dfd0;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .lightbox-close:hover {
+            color: #3d5a3d;
+        }
+        
+        .lightbox-title {
+            color: #a89078;
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        /* About section with irregular cracked decay texture */
+        #about {
+            padding: 6rem 3rem 6rem 6rem;
+            background: #1a1410;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Irregular cracked decay texture */
+        #about::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(125deg, transparent 48%, rgba(61, 90, 61, 0.03) 49%, rgba(61, 90, 61, 0.03) 50%, transparent 51%),
+                linear-gradient(37deg, transparent 47%, rgba(168, 144, 120, 0.02) 48%, rgba(168, 144, 120, 0.02) 49%, transparent 50%),
+                linear-gradient(215deg, transparent 51%, rgba(61, 90, 61, 0.025) 52%, rgba(61, 90, 61, 0.025) 53%, transparent 54%),
+                linear-gradient(165deg, transparent 62%, rgba(168, 144, 120, 0.015) 63%, rgba(168, 144, 120, 0.015) 64%, transparent 65%),
+                linear-gradient(88deg, transparent 71%, rgba(61, 90, 61, 0.02) 72%, rgba(61, 90, 61, 0.02) 73%, transparent 74%),
+                linear-gradient(310deg, transparent 38%, rgba(168, 144, 120, 0.02) 39%, rgba(168, 144, 120, 0.02) 40%, transparent 41%);
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        
+        .about-content {
+            max-width: 650px;
+            margin-left: 2rem;
+            background: rgba(26, 20, 16, 0.8);
+            padding: 3rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(168, 144, 120, 0.1);
+            position: relative;
+            z-index: 1;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        
+        .about-content.visible {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        .about-content p {
+            font-size: 0.95rem;
+            line-height: 1.9;
+            color: #d4c4b0;
+            margin-bottom: 1.5rem;
+        }
+        
+        /* Contact section */
+        #contact {
+            padding: 6rem 3rem 6rem 6rem;
+            background: #2a2010;
+        }
+        
+        .contact-content {
+            max-width: 500px;
+            margin-left: 2rem;
+        }
+        
+        .contact-content p {
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            color: #d4c4b0;
+        }
+        
+        .contact-content a {
+            color: #3d5a3d;
+            text-decoration: none;
+            border-bottom: 1px solid #3d5a3d;
+            transition: color 0.3s, border-color 0.3s;
+        }
+        
+        .contact-content a:hover {
+            color: #5a7a5a;
+            border-color: #5a7a5a;
+        }
+        
+        footer {
+            text-align: right;
+            padding: 2rem 3rem;
+            font-size: 0.75rem;
+            color: #5a4a3a;
+            background: #1a1410;
+        }
+        
+        @media (max-width: 1024px) {
+            body {
+                cursor: auto;
+            }
+            
+            .cursor,
+            .cursor-follower {
+                display: none;
+            }
+            
+            nav {
+                position: static;
+                writing-mode: horizontal-tb;
+                padding: 2rem 2rem 1rem;
+                transform: none;
+                background: #1a1410;
+            }
+            
+            nav ul {
+                flex-direction: row;
+                justify-content: center;
+            }
+            
+            .hero,
+            #work,
+            #about,
+            #contact {
+                padding: 3rem 2rem;
+            }
+            
+            .hero-content,
+            .gallery,
+            .about-content,
+            .contact-content {
+                margin-left: 0;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-label {
+                padding-left: 0;
+            }
+            
+            .about-content {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <nav>
+        <ul>
+            <li><a href="#work">Work</a></li>
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1>David</h1>
+            <p>Photography exploring the abstract complexity of weathered wood — texture, decay, and the visual pathways that emerge from natural degradation.</p>
+        </div>
+    </div>
+
+    <section id="work">
+        <div class="section-label">Selected Work</div>
+        <div class="gallery">
+            <div class="gallery-item" data-title="Layered Decay">
+                <img src="https://images.unsplash.com/photo-1515268064500-a8ecc641d7ff?w=800&q=80" alt="Layered Decay">
+            </div>
+            <div class="gallery-item" data-title="Textured Substrate">
+                <img src="https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=800&q=80" alt="Textured Substrate">
+            </div>
+            <div class="gallery-item" data-title="Grain Study 03">
+                <img src="https://images.unsplash.com/photo-1563089145-599997674d42?w=800&q=80" alt="Grain Study 03">
+            </div>
+            <div class="gallery-item" data-title="Driftwood Fragment">
+                <img src="https://images.unsplash.com/photo-1518837695005-2083093ee35b?w=800&q=80" alt="Driftwood Fragment">
+            </div>
+            <div class="gallery-item" data-title="Forest Floor">
+                <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80" alt="Forest Floor">
+            </div>
+            <div class="gallery-item" data-title="Weathered Accumulation">
+                <img src="https://images.unsplash.com/photo-1473773508845-188df298d2d1?w=800&q=80" alt="Weathered Accumulation">
+            </div>
+        </div>
+    </section>
+
+    <section id="about">
+        <div class="section-label">About</div>
+        <div class="about-content">
+            <p>My photography explores the textures of weathered and decaying wood - driftwood, fallen logs, moss-covered stumps. I'm drawn to how natural decay creates visual complexity: the grain lines, cracks, and patterns create abstract compositions where the eye can trace pathways and discover emerging forms.</p>
+            
+            <p>Light and texture are my primary tools. My goal is to transform overlooked natural decay into something visually compelling that invites prolonged looking.</p>
+            
+            <p>I work across environments - beaches, forests, wherever wood has been left to weather and break down. The material itself is the constant; the specific location matters less than what time and the elements have done to the surface.</p>
+        </div>
+    </section>
+
+    <section id="contact">
+        <div class="section-label">Contact</div>
+        <div class="contact-content">
+            <p>Available for exhibitions, collaborations, and print sales.</p>
+            <p><a href="mailto:contact@example.com">contact@example.com</a></p>
+        </div>
+    </section>
+
+    <footer>
+        © 2025 David
+    </footer>
+
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <span class="lightbox-close">&times;</span>
+            <img id="lightbox-img" src="" alt="">
+            <div class="lightbox-title" id="lightbox-title"></div>
+        </div>
+    </div>
+
+    <script>
+        // Custom cursor
+        const cursor = document.querySelector('.cursor');
+        const follower = document.querySelector('.cursor-follower');
+        
+        let mouseX = 0, mouseY = 0;
+        let followerX = 0, followerY = 0;
+        
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            cursor.style.left = mouseX + 'px';
+            cursor.style.top = mouseY + 'px';
+        });
+        
+        // Smooth follower animation
+        function animateFollower() {
+            const diffX = mouseX - followerX;
+            const diffY = mouseY - followerY;
+            
+            followerX += diffX * 0.1;
+            followerY += diffY * 0.1;
+            
+            follower.style.left = followerX + 'px';
+            follower.style.top = followerY + 'px';
+            
+            requestAnimationFrame(animateFollower);
+        }
+        animateFollower();
+        
+        // Cursor hover effects
+        const hoverElements = document.querySelectorAll('a, .gallery-item');
+        hoverElements.forEach(el => {
+            el.addEventListener('mouseenter', () => cursor.classList.add('hover'));
+            el.addEventListener('mouseleave', () => cursor.classList.remove('hover'));
+        });
+        
+        // Parallax effect on hero
+        const heroBg = document.querySelector('.hero-bg');
+        window.addEventListener('mousemove', (e) => {
+            const x = (e.clientX / window.innerWidth - 0.5) * 20;
+            const y = (e.clientY / window.innerHeight - 0.5) * 20;
+            heroBg.style.transform = `translate(${x}px, ${y}px)`;
+        });
+        
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+        
+        document.querySelectorAll('.gallery-item, .about-content').forEach(el => {
+            observer.observe(el);
+        });
+        
+        // Lightbox functionality
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxTitle = document.getElementById('lightbox-title');
+        const lightboxClose = document.querySelector('.lightbox-close');
+        
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const img = item.querySelector('img');
+                lightboxImg.src = img.src;
+                lightboxTitle.textContent = item.dataset.title;
+                lightbox.classList.add('active');
+            });
+        });
+        
+        lightboxClose.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+        
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                lightbox.classList.remove('active');
+            }
+        });
+        
+        // Close lightbox with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+                lightbox.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
